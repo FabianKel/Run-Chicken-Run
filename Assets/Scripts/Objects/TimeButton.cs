@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(AudioSource))]
 public class TimeButton : MonoBehaviour
 {
     [Header("Visuales")]
@@ -13,6 +14,7 @@ public class TimeButton : MonoBehaviour
 
     [Header("Temporizador")]
     public float waitTime = 3.0f;
+    public AudioClip timerSound;
 
     [Header("Eventos")]
     public UnityEvent OnButtonPressed;
@@ -21,10 +23,12 @@ public class TimeButton : MonoBehaviour
     private List<GameObject> objectsOnButton = new List<GameObject>();
     private float targetY;
     private Coroutine releaseCoroutine;
+    private AudioSource audioSource;
 
     void Start()
     {
         targetY = unpressedHeight;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -46,6 +50,9 @@ public class TimeButton : MonoBehaviour
             if (releaseCoroutine != null)
             {
                 StopCoroutine(releaseCoroutine);
+
+                if (audioSource != null) audioSource.Stop();
+
                 releaseCoroutine = null;
                 Debug.Log("Temporizador cancelado: alguien volvió a pisar el botón.");
             }
@@ -70,7 +77,11 @@ public class TimeButton : MonoBehaviour
 
             if (objectsOnButton.Count == 0)
             {
-                if (releaseCoroutine != null) StopCoroutine(releaseCoroutine);
+                if (releaseCoroutine != null)
+                {
+                    StopCoroutine(releaseCoroutine);
+                    if (audioSource != null) audioSource.Stop();
+                }
 
                 releaseCoroutine = StartCoroutine(WaitAndRelease());
             }
@@ -80,7 +91,20 @@ public class TimeButton : MonoBehaviour
     IEnumerator WaitAndRelease()
     {
         Debug.Log($"Iniciando cuenta atrás de {waitTime} segundos...");
+
+        if (audioSource != null && timerSound != null)
+        {
+            audioSource.clip = timerSound;
+            audioSource.loop = true;
+            audioSource.Play();
+        }
+
         yield return new WaitForSeconds(waitTime);
+
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
 
         targetY = unpressedHeight;
         OnButtonReleased.Invoke();

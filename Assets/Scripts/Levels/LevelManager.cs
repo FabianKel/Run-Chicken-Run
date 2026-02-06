@@ -25,6 +25,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject deathOverlay;
     [SerializeField] private float overlayDuration = 0.5f;
 
+    private AudioSource playerAudioSource;
+
     private Vector3 currentLevelSpawnPoint;
 
 
@@ -70,6 +72,10 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        if (player != null)
+        {
+            playerAudioSource = player.GetComponent<AudioSource>();
+        }
         PrepareLevel();
         SetCurrentSpawn(player.transform.position);
     }
@@ -106,6 +112,11 @@ public class LevelManager : MonoBehaviour
 
     IEnumerator RespawnRoutine()
     {
+        if (playerAudioSource != null)
+        {
+            playerAudioSource.Play();
+        }
+
         if (deathOverlay != null) deathOverlay.SetActive(true);
 
         CharacterController cc = player.GetComponent<CharacterController>();
@@ -146,7 +157,7 @@ public class LevelManager : MonoBehaviour
 
         // UI
         totalSeedsInLevel = seedsInCurrentLevel;
-        UIManager.Instance.UpdateSeedUI(0, totalSeedsInLevel);
+        GameUIManager.Instance.UpdateSeedUI(0, totalSeedsInLevel);
 
 
         Debug.Log($"<color=green>Nivel {currentLevel} iniciado.</color> Semillas: {seedsInCurrentLevel}");
@@ -164,7 +175,7 @@ public class LevelManager : MonoBehaviour
         Debug.Log($"Semilla recogida. Quedan: {seedsInCurrentLevel}");
         // UI
         int collected = totalSeedsInLevel - seedsInCurrentLevel;
-        UIManager.Instance.UpdateSeedUI(collected, totalSeedsInLevel);
+        GameUIManager.Instance.UpdateSeedUI(collected, totalSeedsInLevel);
 
         if (seedsInCurrentLevel <= 0)
         {
@@ -239,7 +250,7 @@ public class LevelManager : MonoBehaviour
         else
         {
             Debug.Log("<color=yellow>¡JUEGO COMPLETADO!</color>");
-            MenuManager.Instance.ShowWinScreen();
+            GameUIManager.Instance.ShowWinScreen();
         }
     }
 

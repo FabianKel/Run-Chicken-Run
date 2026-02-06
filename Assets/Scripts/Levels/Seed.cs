@@ -4,8 +4,9 @@ public class Seed : MonoBehaviour
 {
     private bool collected = false;
 
-    [Header("Sonidos de Recolección")]
+    [Header("Configuración de Audio")]
     public AudioClip[] collectSounds;
+    [Range(0f, 1f)] public float volumen = 1f; // Control deslizante en el Inspector
 
     void OnTriggerEnter(Collider other)
     {
@@ -33,7 +34,10 @@ public class Seed : MonoBehaviour
 
             if (clipSeleccionado != null)
             {
-                AudioSource.PlayClipAtPoint(clipSeleccionado, transform.position, 1.0f);
+
+                Vector3 posicionSonido = Camera.main != null ? Camera.main.transform.position : transform.position;
+
+                AudioSource.PlayClipAtPoint(clipSeleccionado, posicionSonido, volumen);
             }
         }
     }
